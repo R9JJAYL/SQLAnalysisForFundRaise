@@ -9,26 +9,26 @@ Query 1 :
 */
 
 SELECT
-	YEAR(ws.created_at) AS yr,
+    YEAR(ws.created_at) AS yr,
     QUARTER(ws.created_at) AS q,
     COUNT(DISTINCT ws.website_session_id) AS num_sessions,
     COUNT(DISTINCT o.order_id) AS num_orders,
     COUNT(DISTINCT o.order_id) / COUNT(DISTINCT ws.website_session_id) AS cvr_rt,
     SUM(price_usd) / COUNT(DISTINCT o.order_id) AS rev_per_order,
-	SUM(price_usd) / COUNT(DISTINCT ws.website_session_id) AS rev_per_session
+    SUM(price_usd) / COUNT(DISTINCT ws.website_session_id) AS rev_per_session
 FROM
-	website_sessions ws
+    website_sessions ws
 -- bringing is website_sessions for access to session level data
     LEFT JOIN orders o
-		USING(website_session_id)
+	USING(website_session_id)
 -- joining to the orders table so we can create the conversion rates and bring in revenue figures 
 WHERE 
 	ws.created_at <= '2014-12-31'
 GROUP BY 
 -- grouping by year and quarter to create the trending analysis possible 
-1,2
+    1,2
 ORDER BY 
-1,2	;
+    1,2	;
 
 /* 
 - Ordering by year and quarter to make align with the desired trend pattern
@@ -44,27 +44,27 @@ SO WE CAN ASSESS HOW THE BRAND IS GAINING STRENGTH AND TRAFFIC IS COMING TO OUR 
 */
 
 SELECT 
-	YEAR(ws.created_at) AS yr,
+    YEAR(ws.created_at) AS yr,
     QUARTER(ws.created_at) AS q,
-	COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' AND utm_campaign= 'nonbrand' THEN o.order_id ELSE NULL END) AS gsearch_nonbrand,
-	COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' AND utm_campaign= 'nonbrand' THEN o.order_id ELSE NULL END) AS bsearch_nonbrand, 
+    COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' AND utm_campaign = 'nonbrand' THEN o.order_id ELSE NULL END) AS gsearch_nonbrand,
+    COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' AND utm_campaign = 'nonbrand' THEN o.order_id ELSE NULL END) AS bsearch_nonbrand, 
     COUNT(DISTINCT CASE WHEN http_referer IS NOT NULL AND utm_source IS NULL THEN o.order_id ELSE NULL END) AS organic_search,
-	COUNT(DISTINCT CASE WHEN http_referer IS NULL THEN o.order_id ELSE NULL END) AS direct_type_in,
-	COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN o.order_id ELSE NULL END) AS total_brand_search,
+    COUNT(DISTINCT CASE WHEN http_referer IS NULL THEN o.order_id ELSE NULL END) AS direct_type_in,
+    COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN o.order_id ELSE NULL END) AS total_brand_search,
 -- creating the buckets for each traffic type, to assess and analyse their performance 
 -- the below could be done as a seperate query for readablity of the query and results, or could be presented side by side, whichever is preferred by end user
 -- using the previous buckets to understand what % of the orders are coming from each traffic type
     COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' AND utm_campaign= 'nonbrand' THEN o.order_id ELSE NULL END) / COUNT(DISTINCT o.order_id) AS gsearch_nonbrand_pct,
-	COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' AND utm_campaign= 'nonbrand' THEN o.order_id ELSE NULL END) / COUNT(DISTINCT o.order_id) AS bsearch_nonbrand_pct, 
+    COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' AND utm_campaign= 'nonbrand' THEN o.order_id ELSE NULL END) / COUNT(DISTINCT o.order_id) AS bsearch_nonbrand_pct, 
     COUNT(DISTINCT CASE WHEN http_referer IS NOT NULL AND utm_source IS NULL THEN o.order_id ELSE NULL END) / COUNT(DISTINCT o.order_id) AS organic_search_pct,
-	COUNT(DISTINCT CASE WHEN http_referer IS NULL THEN o.order_id ELSE NULL END) / COUNT(DISTINCT o.order_id) AS direct_type_in_pct,
-	COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN o.order_id ELSE NULL END) / COUNT(DISTINCT o.order_id) AS total_brand_search_pct
+    COUNT(DISTINCT CASE WHEN http_referer IS NULL THEN o.order_id ELSE NULL END) / COUNT(DISTINCT o.order_id) AS direct_type_in_pct,
+    COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN o.order_id ELSE NULL END) / COUNT(DISTINCT o.order_id) AS total_brand_search_pct
 FROM 
-	website_sessions ws
-	LEFT JOIN orders o
-		USING(website_session_id)
+    website_sessions ws
+    LEFT JOIN orders o
+  	USING(website_session_id)
 GROUP BY
-	YEAR(ws.created_at),
+    YEAR(ws.created_at),
     QUARTER(ws.created_at)
 ;
 
@@ -77,28 +77,29 @@ Query 3 : GATHERING QUARTERLY SESSION TO ORDER FROM EACH GSEARCH NONBRAND, BSEAR
 */
 
 SELECT 
-	YEAR(ws.created_at) AS yr,
+    YEAR(ws.created_at) AS yr,
     QUARTER(ws.created_at) AS q,
 -- now creating the formula to calulate what percentage of the orders came from each type of traffic below
-	COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' AND utm_campaign= 'nonbrand' THEN o.order_id ELSE NULL END) 
+    COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' AND utm_campaign= 'nonbrand' THEN o.order_id ELSE NULL END) 
 		/ COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' AND utm_campaign= 'nonbrand' THEN ws.website_session_id ELSE NULL END) AS gsearch_nonbrand,
-	COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' AND utm_campaign = 'nonbrand' THEN o.order_id ELSE NULL END)
+    COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' AND utm_campaign = 'nonbrand' THEN o.order_id ELSE NULL END)
 		/ COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' AND utm_campaign = 'nonbrand' THEN ws.website_session_id ELSE NULL END) AS bsearch_nonbrand, 
     COUNT(DISTINCT CASE WHEN http_referer IS NOT NULL AND utm_source IS NULL THEN o.order_id ELSE NULL END)
 		/ COUNT(DISTINCT CASE WHEN http_referer IS NOT NULL AND utm_source IS NULL THEN ws.website_session_id ELSE NULL END) AS organic_search,
-	COUNT(DISTINCT CASE WHEN http_referer IS NULL THEN o.order_id ELSE NULL END) 
+    COUNT(DISTINCT CASE WHEN http_referer IS NULL THEN o.order_id ELSE NULL END) 
 		/ COUNT(DISTINCT CASE WHEN http_referer IS NULL THEN ws.website_session_id ELSE NULL END)AS direct_type_in,
-	COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN o.order_id ELSE NULL END)
+    COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN o.order_id ELSE NULL END)
 		/ COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN ws.website_session_id ELSE NULL END) AS total_brand_search
 FROM 
-	website_sessions ws
+    website_sessions ws
 	LEFT JOIN orders o
 		USING(website_session_id)
 -- bringing in website sessions to create the groups of each traffic type, and orders to figure out which resulted in completing orders 
 WHERE 
-	ws.created_at <= '2014-12-31'
+    ws.created_at <= '2014-12-31'
 -- limiting the date range to only complete time frames 
-GROUP BY 1,2 ;
+GROUP BY 
+    1,2 ;
 
 /* 
 across all of our channels our session to order conversion rate is steadily growing, an indication of our previous analysis and website improvements / purchase pathway optimisations 
@@ -109,11 +110,11 @@ Query 4 :
 DIVING DEEPER INTO REVENUE BY PRODUCTS, LET'S SEE WHAT THE MONTHLY SALES TRENDS LOOK LIKE AND POTENTIAL HIGH SEASONS 
 */
 SELECT 
-	YEAR(oi.created_at) as yr,
+    YEAR(oi.created_at) as yr,
     MONTH(oi.created_at) as mo,
     SUM(CASE WHEN oi.product_id = '1' THEN oi.price_usd ELSE NULL END) AS p1_revenue,
     SUM(CASE WHEN oi.product_id = '1' THEN oi.price_usd - cogs_usd ELSE NULL END)  AS p1_margain,
-	SUM(CASE WHEN oi.product_id = '2' THEN oi.price_usd ELSE NULL END) AS p2_revenue,
+    SUM(CASE WHEN oi.product_id = '2' THEN oi.price_usd ELSE NULL END) AS p2_revenue,
     SUM(CASE WHEN oi.product_id = '2' THEN oi.price_usd - cogs_usd ELSE NULL END) AS p2_margain,
     SUM(CASE WHEN oi.product_id = '3' THEN oi.price_usd ELSE NULL END) AS p3_revenue,
     SUM(CASE WHEN oi.product_id = '3' THEN oi.price_usd - cogs_usd ELSE NULL END) AS p3_margain,
@@ -127,8 +128,9 @@ SELECT
 FROM 
     order_items oi
 WHERE 
-	oi.created_at <= '2015-02-28'
-GROUP BY 1,2
+    oi.created_at <= '2015-02-28'
+GROUP BY 
+    1,2
 ;
 
 /*
@@ -148,7 +150,7 @@ NOTE : again capping off at the final month as we don't have a full story of dat
 CREATE TEMPORARY TABLE click_through
 -- creating a temporary table to flag those website sessions that clicked through to the next page
 SELECT 
-	prod_page.website_session_id,
+    prod_page.website_session_id,
     products_pageview_id,
     prod_created_at,
     MIN(pvs.website_pageview_id) AS clicked_through,
@@ -158,39 +160,39 @@ FROM
 -- first of all creating a subquery in order to select the MIN page_id that is on the product page
 -- then we can see if any subsequent pages were clicked in the main query
 		SELECT 
-			website_session_id,
-			MIN(website_pageview_id) AS products_pageview_id,
-            MIN(created_at) AS prod_created_at
+		    website_session_id,
+ 	            MIN(website_pageview_id) AS products_pageview_id,
+                    MIN(created_at) AS prod_created_at
 		FROM 
-			website_pageviews 
+		    website_pageviews 
 		WHERE 
-			pageview_url = '/products'
+		    pageview_url = '/products'
 -- limiting to products so that we can find out what pageview id each session was on the products page and then grouped by session also
 		GROUP BY
-			website_session_id
+		    website_session_id
         ) AS prod_page
 LEFT JOIN 
-	website_pageviews pvs
-		ON pvs.website_session_id = prod_page.website_session_id
-        AND pvs.website_pageview_id > prod_page.products_pageview_id
+    website_pageviews pvs
+    ON pvs.website_session_id = prod_page.website_session_id
+    AND pvs.website_pageview_id > prod_page.products_pageview_id
 -- left joining to website pageviews again with a condition that only joins with pageview ids that are after the one displayed for the products page,
 -- so we can bring in the session that followed the products page with the MIN function
 GROUP BY 
-	prod_page.website_session_id;
+    prod_page.website_session_id;
 
 -- using the temporary table we produced above, to aggregate for our click through and conversion rates
 SELECT
-	YEAR(prod_created_at) AS yr,
+    YEAR(prod_created_at) AS yr,
     MONTH(prod_created_at) AS mo,
     COUNT(DISTINCT products_pageview_id) AS product_views,
     COUNT(DISTINCT clicked_through) AS clicked_through,
     COUNT(DISTINCT clicked_through) / COUNT(DISTINCT products_pageview_id) AS pct_clicked,
     COUNT(DISTINCT order_id) / COUNT(DISTINCT products_pageview_id) AS product_to_order_cvr_rate
 FROM
-	click_through ct
-LEFT JOIN
+    click_through ct
+	LEFT JOIN
 	orders o 
-		USING(website_session_id)
+	USING(website_session_id)
 GROUP BY 
 	1,2;
 
@@ -209,59 +211,59 @@ LOOK INTO HOW OUR PROUDCTS ARE CROSS SELLING ON EACH OTHER AND HOW THAT HAS IMPA
 -- so we can have a fair assesment of the cross selling
 
 SELECT 
-	MIN(created_at) -- it was '2014-12-05'
+    MIN(created_at) -- it was '2014-12-05'
 FROM 
-	website_pageviews
+    website_pageviews
 WHERE 
-	pageview_url = '/the-hudson-river-mini-bear'
+    pageview_url = '/the-hudson-river-mini-bear'
 
 GROUP BY 
-	pageview_url
+    pageview_url
 ;
 
 -- main query for cross sell data below
 
 SELECT 
-	primary_item,
+   primary_item,
 -- using aggregations from the subqueried data, to give us an overview of the cross selling patterns and behaviors of each product
-    COUNT(DISTINCT order_id) AS primary_orders,
-    COUNT(CASE WHEN not_primary_1 = 1 THEN 1 ELSE NULL END) AS p1_x_sell,
-	ROUND(COUNT(CASE WHEN not_primary_1 = 1 THEN 1 ELSE NULL END) 
-		/ COUNT(DISTINCT order_id),2) AS p1_x_sell_rt,
-    COUNT(CASE WHEN not_primary_2 = 1 THEN 1 ELSE NULL END) AS p2_x_sell,
-	ROUND(COUNT(CASE WHEN not_primary_2 = 1 THEN 1 ELSE NULL END) 
-		/ COUNT(DISTINCT order_id),2) AS p2_x_sell_rt,
-    COUNT(CASE WHEN not_primary_3 = 1 THEN 1 ELSE NULL END) AS p3_x_sell,
-    ROUND(COUNT(CASE WHEN not_primary_3 = 1 THEN 1 ELSE NULL END) 
-		/ COUNT(DISTINCT order_id),2) AS p3_x_sell_rt,
-    COUNT(CASE WHEN not_primary_4 = 1 THEN 1 ELSE NULL END) AS p4_x_sell,
-    ROUND(COUNT(CASE WHEN not_primary_4 = 1 THEN 1 ELSE NULL END) 
-		/ COUNT(DISTINCT order_id),2) AS p4_x_sell_rt
+   COUNT(DISTINCT order_id) AS primary_orders,
+   COUNT(CASE WHEN not_primary_1 = 1 THEN 1 ELSE NULL END) AS p1_x_sell,
+   ROUND(COUNT(CASE WHEN not_primary_1 = 1 THEN 1 ELSE NULL END) 
+	/ COUNT(DISTINCT order_id),2) AS p1_x_sell_rt,
+   COUNT(CASE WHEN not_primary_2 = 1 THEN 1 ELSE NULL END) AS p2_x_sell,
+   ROUND(COUNT(CASE WHEN not_primary_2 = 1 THEN 1 ELSE NULL END) 
+	/ COUNT(DISTINCT order_id),2) AS p2_x_sell_rt,
+   COUNT(CASE WHEN not_primary_3 = 1 THEN 1 ELSE NULL END) AS p3_x_sell,
+   ROUND(COUNT(CASE WHEN not_primary_3 = 1 THEN 1 ELSE NULL END) 
+	/ COUNT(DISTINCT order_id),2) AS p3_x_sell_rt,
+   COUNT(CASE WHEN not_primary_4 = 1 THEN 1 ELSE NULL END) AS p4_x_sell,
+   ROUND(COUNT(CASE WHEN not_primary_4 = 1 THEN 1 ELSE NULL END) 
+	/ COUNT(DISTINCT order_id),2) AS p4_x_sell_rt
 FROM 
 	(
 -- creating a query so it's possible to aggregate the cross sell rate using 1s & 0s as flags to decide if the product is the primary purchase or a cross sell
 	SELECT 
-		order_id,
-		SUM(CASE WHEN is_primary_item = 1 AND product_id = 1 THEN 1 ELSE 0 END) AS primary_1,
-		SUM(CASE WHEN is_primary_item = 1 AND product_id = 2 THEN 1 ELSE 0 END) AS primary_2,
-		SUM(CASE WHEN is_primary_item = 1 AND product_id = 3 THEN 1 ELSE 0 END) AS primary_3,
-		SUM(CASE WHEN is_primary_item = 1 AND product_id = 4 THEN 1 ELSE 0 END) AS primary_4,
-		SUM(CASE WHEN is_primary_item = 0 AND product_id = 1 THEN 1 ELSE 0 END) AS not_primary_1,
-		SUM(CASE WHEN is_primary_item = 0 AND product_id = 2 THEN 1 ELSE 0 END) AS not_primary_2,
-		SUM(CASE WHEN is_primary_item = 0 AND product_id = 3 THEN 1 ELSE 0 END) AS not_primary_3,
-		SUM(CASE WHEN is_primary_item = 0 AND product_id = 4 THEN 1 ELSE 0 END) AS not_primary_4,
-        SUM(CASE WHEN is_primary_item = 1 THEN product_id ELSE 0 END) AS primary_item
+	   order_id,
+	   SUM(CASE WHEN is_primary_item = 1 AND product_id = 1 THEN 1 ELSE 0 END) AS primary_1,
+	   SUM(CASE WHEN is_primary_item = 1 AND product_id = 2 THEN 1 ELSE 0 END) AS primary_2,
+	   SUM(CASE WHEN is_primary_item = 1 AND product_id = 3 THEN 1 ELSE 0 END) AS primary_3,
+	   SUM(CASE WHEN is_primary_item = 1 AND product_id = 4 THEN 1 ELSE 0 END) AS primary_4,
+	   SUM(CASE WHEN is_primary_item = 0 AND product_id = 1 THEN 1 ELSE 0 END) AS not_primary_1,
+	   SUM(CASE WHEN is_primary_item = 0 AND product_id = 2 THEN 1 ELSE 0 END) AS not_primary_2,
+	   SUM(CASE WHEN is_primary_item = 0 AND product_id = 3 THEN 1 ELSE 0 END) AS not_primary_3,
+	   SUM(CASE WHEN is_primary_item = 0 AND product_id = 4 THEN 1 ELSE 0 END) AS not_primary_4,
+           SUM(CASE WHEN is_primary_item = 1 THEN product_id ELSE 0 END) AS primary_item
 	FROM
-		order_items oi
+	   order_items oi
 	WHERE 
-		created_at > '2014-12-05'
+	   created_at > '2014-12-05'
 	-- using this timeframe so all products have been selling for the same time period 
 	GROUP BY 
-		order_id ) AS flags
+	   order_id ) AS flags
 GROUP BY 
-	primary_item
-ORDER BY 
-	primary_item
+    primary_item
+ORDER BY  
+    primary_item
 ;
 
 /*
