@@ -5,3 +5,6 @@ This is a short analysis to help prepare for a round of fund raising with some k
 Having used this dataset previously for other analysis, I had familarised myself with times/events such as when website changes and product changes had been made, so when reading the data and making suggestions, sometimes these events are referenced.
 
 Overall I aimed to produce, clear, readable and well commented queries. Showcasing a range and understanding of SQL skills/functions such as: COUNTS, CASE PIVOTS, Subqueries, Temoporary Tables, JOINs, data trends and more. All whilst maintaining and sharing a clear picture of what story the data is showing, so the C-suite can use it for their presentation to the potential investors.
+
+FundRaiseAnalysisCode.SQL is the file with the code
+FundRaiseAnalysisReport has the code along with the queries output
