@@ -1,5 +1,7 @@
 # SQLAnalysisForFundRaise
 
+If you're not familar with GitHub and just want to see the [report click here]([URL](https://github.com/R9JJAYL/SQLAnalysisForFundRaise/blob/main/FundRaiseAnalysisReport.pdf))
+
 This is a short analysis to help prepare for a round of fund raising with some key metrics how the business has progressed over the years covering various analysis of the business online performance, such as click through rates, conversion rates, website traffic source analysis and more.
 
 Having used this dataset previously for other analysis, I had familarised myself with times/events such as when website changes and product changes had been made, so when reading the data and making suggestions, sometimes these events are referenced.
